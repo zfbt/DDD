@@ -98,22 +98,18 @@ var Main = (function (_super) {
     };
     Main.prototype.runGame = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var result, userInfo;
+            var userInfo;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.loadResource()];
                     case 1:
                         _a.sent();
                         this.createGameScene();
-                        return [4 /*yield*/, RES.getResAsync("description_json")];
-                    case 2:
-                        result = _a.sent();
-                        this.startAnimation(result);
                         return [4 /*yield*/, platform.login()];
-                    case 3:
+                    case 2:
                         _a.sent();
                         return [4 /*yield*/, platform.getUserInfo()];
-                    case 4:
+                    case 3:
                         userInfo = _a.sent();
                         console.log(userInfo);
                         return [2 /*return*/];
@@ -169,25 +165,52 @@ var Main = (function (_super) {
         var stageW = this.stage.stageWidth;
         var stageH = this.stage.stageHeight;
         var topMask = new egret.Shape();
-        topMask.graphics.beginFill(0x000000, 0.5);
-        topMask.graphics.drawRect(0, 0, stageW, 172);
+        topMask.graphics.beginFill(0xffffff);
+        topMask.graphics.drawRect(0, 0, stageW, stageH);
         topMask.graphics.endFill();
-        topMask.y = 33;
         this.addChild(topMask);
-        var line = new egret.Shape();
-        line.graphics.lineStyle(2, 0xffffff);
-        line.graphics.moveTo(0, 0);
-        line.graphics.lineTo(0, 117);
-        line.graphics.endFill();
-        line.x = 172;
-        line.y = 61;
-        this.addChild(line);
-        var button = new eui.Button();
-        button.label = "Click!";
-        button.horizontalCenter = 0;
-        button.verticalCenter = 0;
-        this.addChild(button);
-        button.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onButtonClick, this);
+        var arrayGrid = new Array();
+        var gridL = stageW / 13;
+        for (var row = 0; row < 17; row++) {
+            var c = 0xFDE4EB;
+            if (row % 2 == 1) {
+                c = 0xDAF5D7;
+            }
+            for (var col = 0; col < 13; col++) {
+                var startC = 0xffffff;
+                var sepC = c;
+                if (c == 0xFDE4EB) {
+                    startC = c;
+                    sepC = 0xffffff;
+                }
+                var g = new egret.Shape();
+                if (col % 2 == 0) {
+                    g.graphics.beginFill(startC);
+                }
+                else {
+                    g.graphics.beginFill(sepC);
+                }
+                g.graphics.drawRect(col * gridL, row * gridL + 150, gridL, gridL);
+                g.graphics.endFill();
+                this.addChildAt(g, 1);
+                arrayGrid.push(g);
+            }
+        }
+        var ddArray = ["black_png", "blue_png", "brown_png", "green_png", "orange_png", "pink_png", "purple_png"];
+        for (var i = 0; i < ddArray.length; i++) {
+            var gdd = this.createBitmapByName(ddArray[i]);
+            this.addChild(gdd);
+            gdd.x = i * gridL;
+            gdd.y = i * gridL + 150;
+            gdd.height = gridL;
+            gdd.width = gridL;
+        }
+        var transLayler = new egret.Shape();
+        transLayler.graphics.beginFill(0x000000, 0.5);
+        transLayler.graphics.drawRect(0, 0, stageW, stageH);
+        transLayler.graphics.endFill();
+        transLayler.y = 33;
+        this.addChild(transLayler);
     };
     /**
      * 根据name关键字创建一个Bitmap对象。name属性请参考resources/resource.json配置文件的内容。
@@ -198,44 +221,6 @@ var Main = (function (_super) {
         var texture = RES.getRes(name);
         result.texture = texture;
         return result;
-    };
-    /**
-     * 描述文件加载成功，开始播放动画
-     * Description file loading is successful, start to play the animation
-     */
-    Main.prototype.startAnimation = function (result) {
-        var _this = this;
-        var parser = new egret.HtmlTextParser();
-        var textflowArr = result.map(function (text) { return parser.parse(text); });
-        var textfield = this.textfield;
-        var count = -1;
-        var change = function () {
-            count++;
-            if (count >= textflowArr.length) {
-                count = 0;
-            }
-            var textFlow = textflowArr[count];
-            // 切换描述内容
-            // Switch to described content
-            textfield.textFlow = textFlow;
-            var tw = egret.Tween.get(textfield);
-            tw.to({ "alpha": 1 }, 200);
-            tw.wait(2000);
-            tw.to({ "alpha": 0 }, 200);
-            tw.call(change, _this);
-        };
-        change();
-    };
-    /**
-     * 点击按钮
-     * Click the button
-     */
-    Main.prototype.onButtonClick = function (e) {
-        var panel = new eui.Panel();
-        panel.title = "Title";
-        panel.horizontalCenter = 0;
-        panel.verticalCenter = 0;
-        this.addChild(panel);
     };
     return Main;
 }(eui.UILayer));
