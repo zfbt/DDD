@@ -29,8 +29,6 @@
 
 class Main extends eui.UILayer {
 
-    public arrayGrid:Array<egret.Shape>;
-
     protected createChildren(): void {
         super.createChildren();
 
@@ -107,67 +105,18 @@ class Main extends eui.UILayer {
         topMask.graphics.drawRect(0, 0, stageW, stageH);
         topMask.graphics.endFill();
         this.addChild(topMask);
-
         
+        // Make board who will always exists
+        GameData.makeBoard(this);
+        GameData.makeBackGroundDD(this);
+    
+        // Show index page
+        let d:Director = Director.getInstance();
+        d.init(this);
+        d.makeBackGroundLayer();
 
-        let arrayGrid = new Array<egret.Shape>();
-        let gridL = stageW / 13;
 
-        for (let row = 0; row < 17; row++) {
-            let c = 0xFDE4EB;
-            if (row % 2 == 1) {
-                c = 0xDAF5D7;
-            }
-            for (let col = 0; col < 13; col++) {
-                let startC = 0xffffff;
-                let sepC = c;
-                if (c == 0xFDE4EB) {
-                    startC = c;
-                    sepC = 0xffffff;
-                }
-                let g = new egret.Shape();
-                if (col % 2 == 0) {
-                    g.graphics.beginFill(startC);
-                } else {
-                    g.graphics.beginFill(sepC);
-                }
-                g.graphics.drawRect(col * gridL, row * gridL + 150, gridL, gridL);
-                g.graphics.endFill();
-                this.addChildAt(g, 1);
-                arrayGrid.push(g);
-            }
-        }
 
-        let ddArray:string[] = ["black_png", "blue_png", "brown_png", "green_png", "orange_png", "pink_png", "purple_png"]
-
-        for (let i = 0; i < ddArray.length; i++) {
-            let gdd: egret.Bitmap = this.createBitmapByName(ddArray[i]);
-            this.addChild(gdd);
-            gdd.x = i * gridL;
-            gdd.y = i * gridL + 150;
-            gdd.height = gridL;
-            gdd.width = gridL;
-
-        }
-        
-        let transLayler = new egret.Shape();
-        transLayler.graphics.beginFill(0x000000, 0.5);
-        transLayler.graphics.drawRect(0, 0, stageW, stageH);
-        transLayler.graphics.endFill();
-        transLayler.y = 33;
-        this.addChild(transLayler);
     }
-    /**
-     * 根据name关键字创建一个Bitmap对象。name属性请参考resources/resource.json配置文件的内容。
-     * Create a Bitmap object according to name keyword.As for the property of name please refer to the configuration file of resources/resource.json.
-     */
-    private createBitmapByName(name: string): egret.Bitmap {
-        let result = new egret.Bitmap();
-        let texture: egret.Texture = RES.getRes(name);
-        result.texture = texture;
-        return result;
-    }
-
-
 
 }
