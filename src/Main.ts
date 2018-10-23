@@ -45,7 +45,6 @@ class Main extends eui.UILayer {
         }
 
         //inject the custom material parser
-        //注入自定义的素材解析器
         let assetAdapter = new AssetAdapter();
         egret.registerImplementation("eui.IAssetAdapter", assetAdapter);
         egret.registerImplementation("eui.IThemeAdapter", new ThemeAdapter());
@@ -82,7 +81,6 @@ class Main extends eui.UILayer {
     private loadTheme() {
         return new Promise((resolve, reject) => {
             // load skin theme configuration file, you can manually modify the file. And replace the default skin.
-            //加载皮肤主题配置文件,可以手动修改这个文件。替换默认皮肤。
             let theme = new eui.Theme("resource/default.thm.json", this.stage);
             theme.addEventListener(eui.UIEvent.COMPLETE, () => {
                 resolve();
@@ -93,30 +91,23 @@ class Main extends eui.UILayer {
 
     private textfield: egret.TextField;
     /**
-     * 创建场景界面
      * Create scene interface
      */
     protected createGameScene(): void {
-        let stageW = this.stage.stageWidth;
-        let stageH = this.stage.stageHeight;
-
-        let topMask = new egret.Shape();
-        topMask.graphics.beginFill(0xffffff);
-        topMask.graphics.drawRect(0, 0, stageW, stageH);
-        topMask.graphics.endFill();
-        this.addChild(topMask);
-        
-        // Make board who will always exists
-        GameData.makeBoard(this);
-        GameData.makeBackGroundDD(this);
-    
-        // Show index page
+        let cm = ComponentManager.getInstance();
         let d:Director = Director.getInstance();
+        cm.init(this);
         d.init(this);
-        d.makeBackGroundLayer();
 
+        // Background is white
+        cm.showFirstLayer();
 
+        // Make board which always exists
+        GameData.makeBoard(this);
 
+        
+        // Index page
+        d.showIndex();
     }
 
 }

@@ -9,7 +9,7 @@ var Utils = (function () {
      * Create a Bitmap object according to name keyword.As for the property of name please refer to the configuration file of resources/resource.json.
      */
     Utils.createBitmapByName = function (name) {
-        var result = new egret.Bitmap();
+        var result = new TweenBitmap();
         var texture = RES.getRes(name);
         result.texture = texture;
         return result;
