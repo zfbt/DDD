@@ -1,7 +1,7 @@
 {
 	"groups": [
 		{
-			"keys": "green_png,description_json,purple_png,black_png,blue_png,brown_png,orange_png,pink_png,button_up_png,title_png,thumb_pb_png,track_pb_png,des_png,home_png",
+			"keys": "green_png,description_json,purple_png,black_png,blue_png,brown_png,orange_png,pink_png,button_up_png,title_png,thumb_pb_png,track_pb_png,des_png,home_png,dd_mp3,bt_mp3",
 			"name": "preload"
 		}
 	],
@@ -75,6 +75,16 @@
 			"name": "home_png",
 			"type": "image",
 			"url": "assets/home.png"
+		},
+		{
+			"name": "dd_mp3",
+			"type": "sound",
+			"url": "assets/dd.mp3"
+		},
+		{
+			"name": "bt_mp3",
+			"type": "sound",
+			"url": "assets/bt.mp3"
 		}
 	]
 }

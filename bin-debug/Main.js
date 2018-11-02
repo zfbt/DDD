@@ -78,6 +78,7 @@ var Main = (function (_super) {
     }
     Main.prototype.createChildren = function () {
         _super.prototype.createChildren.call(this);
+        //this.stage.scaleMode = egret.StageScaleMode.FIXED_WIDTH;
         egret.lifecycle.addLifecycleListener(function (context) {
             // custom lifecycle plugin
         });

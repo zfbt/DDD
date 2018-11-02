@@ -31,6 +31,8 @@ class Main extends eui.UILayer {
 
     protected createChildren(): void {
         super.createChildren();
+        
+        //this.stage.scaleMode = egret.StageScaleMode.FIXED_WIDTH;
 
         egret.lifecycle.addLifecycleListener((context) => {
             // custom lifecycle plugin
@@ -105,7 +107,6 @@ class Main extends eui.UILayer {
         // Make board which always exists
         GameData.makeBoard(this);
 
-        
         // Index page
         d.showIndex();
     }

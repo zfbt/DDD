@@ -1,11 +1,11 @@
 class GameData {
-    private static matrixGrid:Array<egret.Sprite>;
+    private static board: egret.Sprite;
     private static matrixDD:Array<number>;
     private static countDD:number;  // Count of DD in the board;
     private static childDD: {[key:number]: TweenBitmap;};  // Record the child of grid
-    
-    private static offsetX:number = 50;
-    private static offsetY:number = 150;
+
+    private static offsetX:number = 48;  // left + right = 48
+    private static offsetY:number = 150; // up = 150
     private static colNumber = 13;
     private static rowNumber = 19;
     private static gSize;
@@ -16,55 +16,82 @@ class GameData {
     public static stageW:number = 0;
     public static stageH:number = 0;
 
+    public static game:Main = null;
+    public static scoreNo:number = 0;
+
+    public static currentLevel = 0;
+    public static levelStep = 30;
+
     public static makeBoard(m:Main) {
         let stageW = m.stage.stageWidth;
         let stageH = m.stage.stageHeight;
         GameData.stageW = stageW;
         GameData.stageH = stageH;
+        GameData.game = m;
 
-        GameData.matrixGrid = new Array<egret.Sprite>();
         GameData.matrixDD = new Array<number>();
         GameData.countDD = 0;
         GameData.initPool();
         GameData.childDD = {};
 
+        // calculate the size of game board
         let gridL = (stageW - GameData.offsetX ) / GameData.colNumber;
-        GameData.gSize = gridL;
+        GameData.gSize = Math.floor(gridL);
+        while (GameData.rowNumber * GameData.gSize > stageH - GameData.offsetY - 100) {
+            GameData.rowNumber -= 2;
+        }
 
-        let d = Director.getInstance();
+        // set game level
+        GameData.currentLevel = Math.floor((GameData.colNumber * GameData.rowNumber) / 4);
+
+        // set game board position
+        GameData.board = new egret.Sprite();
+        GameData.board.height = GameData.rowNumber * GameData.gSize;
+        GameData.board.width = GameData.colNumber * GameData.gSize;
+        GameData.offsetX = Math.floor((stageW - GameData.colNumber * GameData.gSize) / 2);
+        GameData.board.x = GameData.offsetX;
+        GameData.board.y = GameData.offsetY;
+
+        // draw grids
         for (let row = 0; row < GameData.rowNumber; row++) {
             let c = 0xFDE4EB;
             if (row % 2 == 1) {
                 c = 0xDAF5D7;
             }
-            for (let col = 0; col < 13; col++) {
+            let rowOffset = row * GameData.gSize;
+            for (let col = 0; col < GameData.colNumber; col++) {
                 let startC = 0xffffff;
                 let sepC = c;
                 if (c == 0xFDE4EB) {
                     startC = c;
                     sepC = 0xffffff;
                 }
-                let g = new egret.Sprite();
                 if (col % 2 == 0) {
-                    g.graphics.beginFill(startC);
+                    GameData.board.graphics.beginFill(startC);
                 } else {
-                    g.graphics.beginFill(sepC);
+                    GameData.board.graphics.beginFill(sepC);
                 }
-                g.graphics.drawRect(0, 0, gridL, gridL);
-                g.x = col * gridL + (GameData.offsetX / 2);
-                g.y = row * gridL + GameData.offsetY;
-                g.graphics.endFill();
-                g.touchEnabled = true;
-                g.$addListener(egret.TouchEvent.TOUCH_TAP, GameData.addScore, GameData);
-                m.addChild(g);
-                GameData.matrixGrid.push(g);
+                GameData.board.graphics.drawRoundRect(
+                    col * GameData.gSize, 
+                    rowOffset,
+                    GameData.gSize,
+                    GameData.gSize,
+                    0,
+                    0,
+                );  
+                GameData.board.graphics.endFill();
                 GameData.matrixDD.push(-1);
-            }
+            }            
         }
+        GameData.board.touchEnabled = true;
+        GameData.board.$addListener(egret.TouchEvent.TOUCH_TAP, this.addScore, this)
+        m.addChild(GameData.board);
     }
 
     public static makeBoardDD(m:Main, no:number) {
         let total = GameData.colNumber * GameData.rowNumber;
+
+        if (no % 2 == 1) { no += 1; }
 
         for (let i = 0; i < total * 0.9; i += 2) {
             if (GameData.countDD >= no) {
@@ -74,25 +101,64 @@ class GameData {
 
             let pos:number = Utils.getRandomInt(0, total+15) % total;
             pos = GameData.findAvailableSlot(pos);
+            let row = Math.floor(pos / GameData.colNumber);
+            let col = pos % GameData.colNumber;
             let gdd: TweenBitmap = GameData.getColorDD(color);
             gdd.height = GameData.gSize;
             gdd.width = GameData.gSize;
-            GameData.matrixGrid[pos].addChild(gdd);
+            gdd.anchorOffsetX = 0.5 * GameData.gSize;
+            gdd.anchorOffsetY = 0.5 * GameData.gSize;
+            gdd.x = col * GameData.gSize + 0.5 * GameData.gSize;
+            gdd.y = row * GameData.gSize + 0.5 * GameData.gSize;
+            GameData.board.addChild(gdd);
             GameData.matrixDD[pos] = color;
             GameData.childDD[pos] = gdd;
 
             let pos2:number = Utils.getRandomInt(0, total+15) % total;
             pos2 = GameData.findAvailableSlot(pos2);
+            let row2 = Math.floor(pos2 / GameData.colNumber);
+            let col2 = pos2 % GameData.colNumber;
             let gdd2: TweenBitmap = GameData.getColorDD(color);
-            console.log("gdd2 height ", gdd2.height, "gSize ", GameData.gSize);
             gdd2.height = GameData.gSize;
             gdd2.width = GameData.gSize;
-            GameData.matrixGrid[pos2].addChild(gdd2);
-            console.log("add dd in grid: ", GameData.matrixGrid[pos2].getChildIndex(gdd2));
+            gdd2.anchorOffsetX = 0.5 * GameData.gSize;
+            gdd2.anchorOffsetY = 0.5 * GameData.gSize;
+            gdd2.x = col2 * GameData.gSize + 0.5 * GameData.gSize;
+            gdd2.y = row2 * GameData.gSize + 0.5 * GameData.gSize;
+            GameData.board.addChild(gdd2);
             GameData.matrixDD[pos2] = color;
             GameData.childDD[pos2] = gdd2;
 
             GameData.countDD += 2;
+        }
+
+        // if current dd is much more than needed, remove some
+        while (GameData.countDD > no + 2) {
+            let a = -1; // pos
+            let c = -1; // col
+            for (let i = GameData.matrixDD.length - 1; i > 0; i--) {
+                if (GameData.matrixDD[i] > -1 && a == -1) {
+                    a = i;
+                    c = GameData.matrixDD[i];
+                    continue;
+                }
+                if (c != -1 && GameData.matrixDD[i] == c) {
+                    // Found a pair
+                    let dd1 = GameData.childDD[a];
+                    GameData.matrixDD[a] = -1;
+                    GameData.board.removeChild(dd1);
+                    GameData.childDD[a] = null;
+                    GameData.ddPool[c].push(dd1);
+
+                    let dd2 = GameData.childDD[i];
+                    GameData.matrixDD[i] = -1;
+                    GameData.board.removeChild(dd2);
+                    GameData.childDD[i] = null;
+                    GameData.ddPool[c].push(dd2);
+                    GameData.countDD -= 2;
+                    break;
+                }
+            }
         }
     }
 
@@ -110,9 +176,8 @@ class GameData {
         let down = GameData.searchDown(pos);
         let left = GameData.searchLeft(pos, row);
         let right = GameData.searchRight(pos, row);
-        console.log("around:", up[0], down[0], left[0], right[0]);
 
-        this.calculate(up, down, left, right);
+        this.calculate(up, down, left, right, pos);
     }
 
     private static searchUp(pos: number): [number, number] {
@@ -168,7 +233,9 @@ class GameData {
         return [cursor, no];
     }
 
-    private static calculate(up:[number,number], down:[number,number], left:[number,number], right:[number,number]) {
+    private static calculate(up:[number,number], down:[number,number],
+        left:[number,number], right:[number,number], pos:number) {
+
         let m: {[key: number]: Array<number>} = {};
 
         // [number, number]  ==> [position, color]
@@ -182,47 +249,36 @@ class GameData {
         if (left[1] >= 0) { m[left[1]].push(left[0]); }
         if (right[1] >= 0) { m[right[1]].push(right[0]); }
 
-        for (let k in m) {
-            console.log(m[k]);
+        let row = Math.floor(pos / GameData.colNumber);
+        let col = pos % GameData.colNumber;
 
+        let total = 0
+        for (let k in m) {
             // Score! remove the DD
             if (m[k].length >= 2) {
-                for (let p of m[k]) {
-                    let grid = GameData.matrixGrid[p];
-                    let dd = GameData.childDD[p];
-                    console.log("dd height: ", dd.height);
-                    console.log("score! remove dd in ", p);
-                    
-                    dd.setP0(dd.x, dd.y);
-                    dd.setP1(800, 50);
-                    dd.setP2(GameData.stageW, 800);
-                    dd.curlTo();
-
-                    //grid.removeChildAt(0);
-                    
-
-                    // reset GameData status
-                    GameData.countDD--;             // Decrease the count of dd in board
-                    GameData.matrixDD[p] = -1;      // Set dd matrix to -1
-                    GameData.childDD[p] = null;     // Child map of DD set to null
-                    GameData.ddPool[k].push(dd);    // DD back to pool for reuse 
-                    console.log("dd pool in ", k,   GameData.ddPool[k].length);
-                }
-
-                ComponentManager.getInstance().addScore(m[k].length);
+                total += m[k].length
+                // Make the animation remove
+                GameData.score(m[k], Number(k), row, col);
             }
         }
+        // Make animation score
+        if (total >= 2) {
+            ComponentManager.getInstance().ddSound.play(0, 1);
+            GameData.aniScore(total, row, col);
+        }
+        // Check win
+        if (GameData.countDD <= 7 && GameData.win()) {
+            Director.getInstance().nextLevelPage();       
+        } 
     }
 
 
     private static getColorDD(col: number): TweenBitmap {
         let r: TweenBitmap = null;
         if (GameData.ddPool[col].length > 1) {
-            console.log("get dd from pool, col: ", col, GameData.ddPool[col].length);
             r = GameData.ddPool[col].pop();
         } 
         if (r == null) {
-            console.log("create a new dd, col: ", col);
             r = Utils.createBitmapByName(GameData.ddArray[col]);
         }
         return r;
@@ -230,10 +286,10 @@ class GameData {
 
     private static findAvailableSlot(pos:number): number {
         while (true) {
-            if (pos == 247) {
+            if (pos == GameData.rowNumber * GameData.colNumber) {
                 pos = 0;
             }
-            if (GameData.matrixGrid[pos].numChildren > 0) {
+            if (GameData.matrixDD[pos] >= 0) {
                 ++pos;
                 continue;
             }
@@ -247,5 +303,100 @@ class GameData {
         for (let i = 0; i < 7; i++) {
             GameData.ddPool[i] = new Array<TweenBitmap>();
         }
+    }
+
+    private static score(dds:Array<number>, color:number, row:number, col:number) {
+        let before = 0;  // 1-right 2-left
+
+        for (let p of dds) {
+            let dd = GameData.childDD[p];
+                    
+            GameData.board.setChildIndex(dd, GameData.board.numChildren - 1);
+
+            dd.setP0(dd.x, dd.y);
+
+            let right = GameData.colNumber - col;
+            let down = GameData.rowNumber - row;
+            let x2, y2, x1, y1 = 0;
+            if (before == 0) {
+                if (right > col) { // go right
+                    x2 = dd.x + 300;
+                    x1 = dd.x + 100;
+                    before = 1;
+                } else { // go left
+                    x2 = dd.x - 300;
+                    x1 = dd.x - 100;
+                    before = 2;
+                }
+            } else {
+                if (before == 1) {  // before is right, then go left 
+                    x2 = dd.x - 300;
+                    x1 = dd.x - 100;
+                    before = 2;
+                } else {
+                    x2 = dd.x + 300;
+                    x1 = dd.x + 100;
+                    before = 1;
+                }
+            }
+            y1 = dd.y - 150;
+            y2 = GameData.stageH - 100;
+
+            dd.setP1(x1, y1);
+            dd.setP2(x2, y2);
+            dd.curlTo();
+            setTimeout(function() {
+                GameData.board.removeChild(dd);  
+            }, 750);
+                    
+            // reset GameData status
+            GameData.countDD--;             // Decrease the count of dd in board
+            GameData.matrixDD[p] = -1;      // Set dd matrix to -1
+            GameData.childDD[p] = null;     // Child map of DD set to null
+            GameData.ddPool[color].push(dd);    // DD back to pool for reuse 
+        }
+    }
+
+    private static aniScore(n: number, row: number, col: number) {
+        let delta = new eui.Label();
+        delta.size = 40;
+        delta.bold = true;
+        delta.textColor = 0xc81983;
+
+        delta.x = col * GameData.gSize;
+        delta.y = row * GameData.gSize;
+        delta.text = "+" + String(n);
+        GameData.board.addChild(delta);
+
+        egret.Tween.get(delta).to({x: 35, y: -100}, 700); 
+        setTimeout(function() {
+            GameData.board.removeChild(delta);
+            ComponentManager.getInstance().addScore(n);
+            GameData.scoreNo += n;
+        }, 700);
+    }
+
+    private static win(): boolean {
+        let stat: {[key:number]: number;} = {};
+        for (let c of GameData.matrixDD) {
+            if (c > -1) {
+                if (stat[c] == null) {
+                    stat[c] = 1;
+                } else {
+                    stat[c] += 1;
+                }
+            }
+        }
+        for (let k in stat) {
+            if (stat[k] > 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static upLevel() {
+        GameData.currentLevel += GameData.levelStep;
+        GameData.makeBoardDD(GameData.game, GameData.currentLevel);
     }
 }

@@ -44,7 +44,10 @@ var TweenBitmap = (function (_super) {
         this.p2Y = y;
     };
     TweenBitmap.prototype.curlTo = function () {
-        egret.Tween.get(this).to({ factor: 1 }, 2000);
+        //console.log("p0x:", this.p0X, "p0y:", this.p0Y);
+        //console.log("p1x:", this.p1X, "p1y:", this.p1Y);
+        //console.log("p2x:", this.p2X, "p2y:", this.p2Y);
+        egret.Tween.get(this).to({ factor: 1 }, 800, egret.Ease.sineInOut);
     };
     return TweenBitmap;
 }(egret.Bitmap));

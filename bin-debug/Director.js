@@ -23,7 +23,8 @@ var Director = (function () {
         this.cm.showStart();
         this.cm.showRankButton();
         this.cm.showMore();
-        GameData.makeBoardDD(this.game, 70);
+        GameData.makeBoardDD(this.game, 10);
+        GameData.scoreNo = 0;
     };
     Director.prototype.onStartButtonDown = function (e) {
         this.cm.onButtonDown("start");
@@ -32,12 +33,13 @@ var Director = (function () {
         this.cm.onButtonUp("start");
     };
     Director.prototype.onStartButtonClick = function (e) {
+        this.cm.btSound.play(0, 1);
         this.beginGame();
     };
     // Game page
     Director.prototype.beginGame = function () {
         this.cm.removeIndexItem();
-        GameData.makeBoardDD(this.game, 120);
+        GameData.makeBoardDD(this.game, GameData.currentLevel);
         this.cm.showScore();
         this.cm.showStop();
         // Set process bar
@@ -49,9 +51,10 @@ var Director = (function () {
         this.cm.onButtonDown("stop");
     };
     Director.prototype.onStopButtonUp = function (e) {
-        this.cm.onButtonDown("stop");
+        this.cm.onButtonUp("stop");
     };
     Director.prototype.onStopButtonClick = function (e) {
+        this.cm.btSound.play(0, 1);
         this.showDesPage();
     };
     // Description page
@@ -72,6 +75,59 @@ var Director = (function () {
     Director.prototype.resumeGame = function (e) {
         this.cm.removeDesItem();
         Process.getInstance().start();
+    };
+    Director.prototype.nextLevelPage = function () {
+        this.cm.removeScore();
+        this.cm.removeStop();
+        this.cm.showTransLayer();
+        this.cm.showWinHome();
+        this.cm.showWinScore();
+        this.cm.showWinbt("nextlevel");
+    };
+    Director.prototype.onWinButtonDown = function (e) {
+        this.cm.onButtonDown("win");
+    };
+    Director.prototype.onWinButtonUp = function (e) {
+        this.cm.onButtonUp("win");
+    };
+    Director.prototype.onWinButtonClickNext = function (e) {
+        this.cm.btSound.play(0, 1);
+        this.cm.removeWinScore();
+        this.cm.removeWinbt();
+        this.cm.removeWinHome();
+        this.cm.removeTransLayer();
+        this.cm.showScore();
+        this.cm.showStop();
+        GameData.upLevel();
+        Process.getInstance().restart();
+    };
+    Director.prototype.onWinButtonClickConinue = function (e) {
+        this.cm.btSound.play(0, 1);
+        this.cm.removeWinScore();
+        this.cm.removeWinbt();
+        this.cm.removeWinHome();
+        this.cm.removeWinText();
+        this.cm.removeTransLayer();
+        this.cm.showScore();
+        this.cm.showStop();
+        Process.getInstance().restart();
+    };
+    Director.prototype.failPage = function () {
+        this.cm.removeScore();
+        this.cm.removeStop();
+        this.cm.showTransLayer();
+        this.cm.showWinHome();
+        this.cm.showWinScore();
+        this.cm.showWinText();
+        this.cm.showWinbt("continue");
+    };
+    Director.prototype.backWinIndex = function () {
+        this.cm.removeWinbt();
+        this.cm.removeWinScore();
+        this.cm.removeWinHome();
+        this.cm.removeWinText();
+        Process.getInstance().exit();
+        this.showIndex();
     };
     Director.instance = null;
     return Director;
