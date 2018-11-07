@@ -411,10 +411,9 @@ class ComponentManager {
         this.game.removeChild(this.winHome);        
     }
 
-    public showWinText() {
+    public showWinText(str: string) {
         if (this.winText == null) {
             let gold = new eui.Label();
-            gold.text = "分享可继续 >";
             gold.size = 32;
             gold.bold = true;
             gold.verticalAlign = "bottom";
@@ -423,6 +422,11 @@ class ComponentManager {
             gold.horizontalCenter = 0;
             gold.verticalCenter = 120;
             this.winText = gold;
+        }
+        if (str == "nextlevel") {
+            this.winText.text = "分享可继续 >";
+        } else {
+            this.winText.text = " ";
         }
         this.game.addChild(this.winText);
     }

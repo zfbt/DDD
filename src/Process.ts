@@ -60,7 +60,10 @@ class Process {
             this.bar.value -= 1;
         }
         if (this.bar.value == 0) {
-            Director.getInstance().failPage();
+            setTimeout(
+                Director.getInstance().failPage(),
+                850,
+            );
         }
     }
 }

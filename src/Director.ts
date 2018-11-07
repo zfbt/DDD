@@ -25,6 +25,8 @@ class Director {
         this.cm.showMore();
         GameData.makeBoardDD(this.game, 10);
         GameData.scoreNo = 0;
+        GameData.currentLevel = 0;
+
     }
     
     public onStartButtonDown(e: egret.TouchEvent) {
@@ -90,6 +92,7 @@ class Director {
         this.cm.showTransLayer();
         this.cm.showWinHome();
         this.cm.showWinScore();
+        this.cm.showWinText("nextlevel");
         this.cm.showWinbt("nextlevel");
     }
 
@@ -129,11 +132,11 @@ class Director {
         this.cm.showTransLayer();
         this.cm.showWinHome();
         this.cm.showWinScore();
-        this.cm.showWinText();
+        this.cm.showWinText("continue");
         this.cm.showWinbt("continue"); 
     }
 
-    public backWinIndex() {
+    public backWinIndex(e: egret.TouchEvent) {
         this.cm.removeWinbt();
         this.cm.removeWinScore();
         this.cm.removeWinHome();
