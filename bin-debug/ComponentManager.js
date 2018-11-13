@@ -66,7 +66,7 @@ var ComponentManager = (function () {
             this.transLayer.graphics.drawRect(0, 0, this.stageW, this.stageH);
             this.transLayer.graphics.endFill();
             this.transLayer.y = 33;
-            this.transLayer.touchEnabled = false;
+            this.transLayer.touchEnabled = true;
             //this.transLayer.$addListener(egret.TouchEvent.TOUCH_TAP, this.nothing, this);
         }
         this.game.addChild(this.transLayer);
@@ -123,15 +123,18 @@ var ComponentManager = (function () {
         this.game.removeChild(this.start);
     };
     ComponentManager.prototype.showRankButton = function () {
+        var d = Director.getInstance();
         if (this.rank == null) {
             var rank = new eui.Label();
             rank.text = "查看排行 >";
             rank.size = 26;
             rank.bold = true;
             rank.fontFamily = "Youyuan";
-            rank.textColor = 0x9b0861;
+            rank.textColor = 0xcc6600;
             rank.horizontalCenter = 0;
             rank.verticalCenter = 300;
+            rank.touchEnabled = true;
+            rank.$addListener(egret.TouchEvent.TOUCH_TAP, d.onRank, d);
             this.rank = rank;
         }
         this.game.addChild(this.rank);
@@ -149,7 +152,7 @@ var ComponentManager = (function () {
             more.size = 26;
             more.bold = true;
             more.fontFamily = "Youyuan";
-            more.textColor = 0x9b0861;
+            more.textColor = 0xcc6600;
             more.horizontalCenter = 0;
             more.verticalCenter = 360;
             this.more = more;
@@ -167,7 +170,7 @@ var ComponentManager = (function () {
             var score = new eui.Label();
             score.size = 100;
             score.bold = true;
-            score.textColor = 0xc81983;
+            score.textColor = 0xff9933;
             score.top = 20;
             score.left = 40;
             this.score = score;
@@ -366,7 +369,7 @@ var ComponentManager = (function () {
         if (this.winScore == null) {
             this.winScore = new eui.Label();
             this.winScore.size = 100;
-            this.winScore.textColor = 0xc81983;
+            this.winScore.textColor = 0xcc6600;
             this.winScore.horizontalCenter = 0;
             this.winScore.verticalCenter = -200;
         }
@@ -432,18 +435,23 @@ var ComponentManager = (function () {
         }
         this.game.removeChild(this.winHome);
     };
-    ComponentManager.prototype.showWinText = function () {
+    ComponentManager.prototype.showWinText = function (str) {
         if (this.winText == null) {
             var gold = new eui.Label();
-            gold.text = "分享可继续 >";
             gold.size = 32;
             gold.bold = true;
             gold.verticalAlign = "bottom";
             gold.fontFamily = "Youyuan";
-            gold.textColor = 0x9b0861;
+            gold.textColor = 0xff7c00;
             gold.horizontalCenter = 0;
             gold.verticalCenter = 120;
             this.winText = gold;
+        }
+        if (str == "continue") {
+            this.winText.text = "分享可继续 >";
+        }
+        else {
+            this.winText.text = " ";
         }
         this.game.addChild(this.winText);
     };

@@ -242,7 +242,12 @@ var GameData = (function () {
         }
         // Check win
         if (GameData.countDD <= 7 && GameData.win()) {
-            Director.getInstance().nextLevelPage();
+            Process.getInstance().stop();
+            setTimeout(function () {
+                if (!Director.getInstance().getStop()) {
+                    Director.getInstance().nextLevelPage();
+                }
+            }, 850);
         }
     };
     GameData.getColorDD = function (col) {

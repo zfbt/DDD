@@ -4,8 +4,8 @@ class Process {
 
     private game:Main = null;
     private timer:egret.Timer = null;
-    private bar:eui.ProgressBar = null;
-    private value:number = 20;
+    public bar:eui.ProgressBar = null;
+    private value:number = 50;
 
     public static getInstance() {
         if (Process.instance == null) {
@@ -60,10 +60,11 @@ class Process {
             this.bar.value -= 1;
         }
         if (this.bar.value == 0) {
-            setTimeout(
-                Director.getInstance().failPage(),
-                850,
-            );
+            setTimeout(function() {
+                if (!Director.getInstance().getStop()) {
+                    Director.getInstance().failPage();
+                }
+            }, 850);
         }
     }
 }

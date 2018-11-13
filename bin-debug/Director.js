@@ -5,6 +5,7 @@ var Director = (function () {
     function Director() {
         this.game = null;
         this.cm = null;
+        this.stop = false;
     }
     Director.getInstance = function () {
         if (Director.instance == null) {
@@ -25,6 +26,7 @@ var Director = (function () {
         this.cm.showMore();
         GameData.makeBoardDD(this.game, 10);
         GameData.scoreNo = 0;
+        GameData.currentLevel = 30;
     };
     Director.prototype.onStartButtonDown = function (e) {
         this.cm.onButtonDown("start");
@@ -54,6 +56,7 @@ var Director = (function () {
         this.cm.onButtonUp("stop");
     };
     Director.prototype.onStopButtonClick = function (e) {
+        this.stop = true;
         this.cm.btSound.play(0, 1);
         this.showDesPage();
     };
@@ -67,13 +70,22 @@ var Director = (function () {
         this.cm.showComment();
     };
     Director.prototype.backIndex = function (e) {
+        this.stop = false;
         this.cm.removeDesItem();
         this.cm.removeGameItem();
         Process.getInstance().exit();
         this.showIndex();
     };
     Director.prototype.resumeGame = function (e) {
+        this.stop = false;
         this.cm.removeDesItem();
+        // Resume game: first check game state
+        if (GameData.countDD <= 7 && GameData.win()) {
+            this.nextLevelPage();
+        }
+        if (Process.getInstance().bar.value == 0) {
+            this.failPage();
+        }
         Process.getInstance().start();
     };
     Director.prototype.nextLevelPage = function () {
@@ -82,6 +94,7 @@ var Director = (function () {
         this.cm.showTransLayer();
         this.cm.showWinHome();
         this.cm.showWinScore();
+        this.cm.showWinText("nextlevel");
         this.cm.showWinbt("nextlevel");
     };
     Director.prototype.onWinButtonDown = function (e) {
@@ -94,6 +107,7 @@ var Director = (function () {
         this.cm.btSound.play(0, 1);
         this.cm.removeWinScore();
         this.cm.removeWinbt();
+        this.cm.removeWinText();
         this.cm.removeWinHome();
         this.cm.removeTransLayer();
         this.cm.showScore();
@@ -118,16 +132,23 @@ var Director = (function () {
         this.cm.showTransLayer();
         this.cm.showWinHome();
         this.cm.showWinScore();
-        this.cm.showWinText();
+        this.cm.showWinText("continue");
         this.cm.showWinbt("continue");
     };
-    Director.prototype.backWinIndex = function () {
+    Director.prototype.backWinIndex = function (e) {
         this.cm.removeWinbt();
         this.cm.removeWinScore();
         this.cm.removeWinHome();
         this.cm.removeWinText();
         Process.getInstance().exit();
         this.showIndex();
+    };
+    Director.prototype.onRank = function (e) {
+        console.log("Rank button clicked!");
+        var platform = window.platform;
+    };
+    Director.prototype.getStop = function () {
+        return this.stop;
     };
     Director.instance = null;
     return Director;

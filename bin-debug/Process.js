@@ -54,7 +54,11 @@ var Process = (function () {
             this.bar.value -= 1;
         }
         if (this.bar.value == 0) {
-            Director.getInstance().failPage();
+            setTimeout(function () {
+                if (!Director.getInstance().getStop()) {
+                    Director.getInstance().failPage();
+                }
+            }, 850);
         }
     };
     Process.instance = null;

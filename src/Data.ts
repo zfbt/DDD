@@ -1,7 +1,7 @@
 class GameData {
     private static board: egret.Sprite;
     private static matrixDD:Array<number>;
-    private static countDD:number;  // Count of DD in the board;
+    public static countDD:number;  // Count of DD in the board;
     private static childDD: {[key:number]: TweenBitmap;};  // Record the child of grid
 
     private static offsetX:number = 48;  // left + right = 48
@@ -19,8 +19,10 @@ class GameData {
     public static game:Main = null;
     public static scoreNo:number = 0;
 
-    public static currentLevel = 0;
-    public static levelStep = 30;
+    public static currentLevel:number = 0;
+    public static levelStep:number = 20;
+
+    public static reliveTimes:number = 0;
 
     public static makeBoard(m:Main) {
         let stageW = m.stage.stageWidth;
@@ -91,6 +93,19 @@ class GameData {
     public static makeBoardDD(m:Main, no:number) {
         let total = GameData.colNumber * GameData.rowNumber;
 
+        // if current dd is not zero, remove all
+        for (let i = GameData.matrixDD.length - 1; i > 0; i--) {
+            if (GameData.matrixDD[i] > -1) {
+                let c = GameData.matrixDD[i];
+                let dd = GameData.childDD[i];
+                GameData.matrixDD[i] = -1;
+                GameData.board.removeChild(dd);
+                GameData.childDD[i] = null;
+                GameData.ddPool[c].push(dd);
+                GameData.countDD -= 1;
+            }
+        }
+
         if (no % 2 == 1) { no += 1; }
 
         for (let i = 0; i < total * 0.9; i += 2) {
@@ -131,42 +146,12 @@ class GameData {
 
             GameData.countDD += 2;
         }
-
-        // if current dd is much more than needed, remove some
-        while (GameData.countDD > no + 2) {
-            let a = -1; // pos
-            let c = -1; // col
-            for (let i = GameData.matrixDD.length - 1; i > 0; i--) {
-                if (GameData.matrixDD[i] > -1 && a == -1) {
-                    a = i;
-                    c = GameData.matrixDD[i];
-                    continue;
-                }
-                if (c != -1 && GameData.matrixDD[i] == c) {
-                    // Found a pair
-                    let dd1 = GameData.childDD[a];
-                    GameData.matrixDD[a] = -1;
-                    GameData.board.removeChild(dd1);
-                    GameData.childDD[a] = null;
-                    GameData.ddPool[c].push(dd1);
-
-                    let dd2 = GameData.childDD[i];
-                    GameData.matrixDD[i] = -1;
-                    GameData.board.removeChild(dd2);
-                    GameData.childDD[i] = null;
-                    GameData.ddPool[c].push(dd2);
-                    GameData.countDD -= 2;
-                    break;
-                }
-            }
-        }
     }
 
     private static addScore(e: egret.TouchEvent) {
         let row = Math.floor((e.stageY - GameData.offsetY) / GameData.gSize);
         let col = Math.floor((e.stageX - GameData.offsetX / 2) / GameData.gSize);
         let pos = row * GameData.colNumber + col;
-        console.log("row", row, "col", col, "pos", pos);
 
         // Click on the DD
         if (GameData.matrixDD[pos] >= 0) { return; }
@@ -269,10 +254,11 @@ class GameData {
         // Check win
         if (GameData.countDD <= 7 && GameData.win()) {
             Process.getInstance().stop();
-            setTimeout(
-                Director.getInstance().nextLevelPage(),
-                850,
-            )
+            setTimeout(function() {
+                if (!Director.getInstance().getStop()) {
+                    Director.getInstance().nextLevelPage();
+                }
+            }, 850);
         } 
     }
 
@@ -365,7 +351,7 @@ class GameData {
         let delta = new eui.Label();
         delta.size = 40;
         delta.bold = true;
-        delta.textColor = 0xc81983;
+        delta.textColor = 0xff7c00;
 
         delta.x = col * GameData.gSize;
         delta.y = row * GameData.gSize;
@@ -380,7 +366,7 @@ class GameData {
         }, 700);
     }
 
-    private static win(): boolean {
+    public static win(): boolean {
         let stat: {[key:number]: number;} = {};
         for (let c of GameData.matrixDD) {
             if (c > -1) {

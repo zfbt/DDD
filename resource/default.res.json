@@ -1,7 +1,7 @@
 {
 	"groups": [
 		{
-			"keys": "green_png,description_json,purple_png,black_png,blue_png,brown_png,orange_png,pink_png,button_up_png,title_png,thumb_pb_png,track_pb_png,des_png,home_png,dd_mp3,bt_mp3",
+			"keys": "green_png,description_json,purple_png,black_png,blue_png,brown_png,orange_png,pink_png,button_up_png,title_png,thumb_pb_png,track_pb_png,des_png,home_png,dd_mp3,bt_mp3,bt_start_png,homel_png,button_down_png",
 			"name": "preload"
 		}
 	],
@@ -85,6 +85,16 @@
 			"name": "bt_mp3",
 			"type": "sound",
 			"url": "assets/bt.mp3"
+		},
+		{
+			"name": "homel_png",
+			"type": "image",
+			"url": "assets/homel.png"
+		},
+		{
+			"name": "button_down_png",
+			"type": "image",
+			"url": "assets/Button/button_down.png"
 		}
 	]
 }

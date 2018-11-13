@@ -2,7 +2,9 @@ class Director {
     public static instance:Director = null;
     private game:Main = null;
     private cm:ComponentManager = null;
-    
+    private stop:boolean = false;
+
+    public buttonState:number = 0; // 0--continue, 1-nextlevel, 2-return
 
     public static getInstance() {
         if (Director.instance == null) {
@@ -23,10 +25,10 @@ class Director {
         this.cm.showStart();
         this.cm.showRankButton();
         this.cm.showMore();
-        GameData.makeBoardDD(this.game, 10);
+        GameData.makeBoardDD(this.game, 20);
         GameData.scoreNo = 0;
-        GameData.currentLevel = 0;
-
+        GameData.currentLevel = 50;
+        GameData.reliveTimes = 0;
     }
     
     public onStartButtonDown(e: egret.TouchEvent) {
@@ -60,6 +62,7 @@ class Director {
         this.cm.onButtonUp("stop");
     }
     public onStopButtonClick(e: egret.TouchEvent) {
+        this.stop = true;
         this.cm.btSound.play(0, 1);
         this.showDesPage();        
     }
@@ -75,6 +78,7 @@ class Director {
     }
 
     public backIndex(e: egret.TouchEvent) {
+        this.stop = false;
         this.cm.removeDesItem();
         this.cm.removeGameItem();
         Process.getInstance().exit();
@@ -82,18 +86,29 @@ class Director {
     }
 
     public resumeGame(e: egret.TouchEvent) {
+        this.stop = false;
         this.cm.removeDesItem();
+
+        // Resume game: first check game state
+        if (GameData.countDD <= 7 && GameData.win()) {
+            this.nextLevelPage();
+        }
+        if (Process.getInstance().bar.value == 0) {
+            this.failPage();
+        }
+
         Process.getInstance().start();
     }
 
     public nextLevelPage() {
+        this.buttonState = 1;
         this.cm.removeScore();
         this.cm.removeStop();
         this.cm.showTransLayer();
         this.cm.showWinHome();
         this.cm.showWinScore();
         this.cm.showWinText("nextlevel");
-        this.cm.showWinbt("nextlevel");
+        this.cm.showWinbt();
     }
 
     public onWinButtonDown(e: egret.TouchEvent) {
@@ -102,10 +117,10 @@ class Director {
     public onWinButtonUp(e: egret.TouchEvent) {
         this.cm.onButtonUp("win");
     }
-    public onWinButtonClickNext(e: egret.TouchEvent) {
-        this.cm.btSound.play(0, 1);
+    public nexeLevel() {
         this.cm.removeWinScore();
         this.cm.removeWinbt();
+        this.cm.removeWinText();
         this.cm.removeWinHome();
         this.cm.removeTransLayer();
         this.cm.showScore();
@@ -114,8 +129,7 @@ class Director {
         Process.getInstance().restart(); 
     }
 
-    public onWinButtonClickConinue(e: egret.TouchEvent) {
-        this.cm.btSound.play(0, 1);
+    public continuePlay() {
         this.cm.removeWinScore();
         this.cm.removeWinbt();
         this.cm.removeWinHome();
@@ -127,21 +141,64 @@ class Director {
     }
 
     public failPage() {
+        if (GameData.reliveTimes < 1) {
+            this.buttonState = 0;
+        } else {
+            this.buttonState = 2;
+        }
         this.cm.removeScore();
         this.cm.removeStop();
         this.cm.showTransLayer();
         this.cm.showWinHome();
         this.cm.showWinScore();
         this.cm.showWinText("continue");
-        this.cm.showWinbt("continue"); 
+        this.cm.showWinbt(); 
     }
 
-    public backWinIndex(e: egret.TouchEvent) {
-        this.cm.removeWinbt();
+    public backWinIndex() {
         this.cm.removeWinScore();
+        this.cm.removeWinbt();
         this.cm.removeWinHome();
         this.cm.removeWinText();
         Process.getInstance().exit();
         this.showIndex();
+    }
+
+    public onRank(e: egret.TouchEvent) {
+        console.log("Rank button clicked!");
+        let platform = window.platform;
+    }
+
+    public onMore(e: egret.TouchEvent) {
+        this.cm.showUnsupport();
+    }
+    public onMoreRemove(e: egret.TouchEvent) {
+        this.cm.removeUnsupport();
+    }
+
+    public getStop(): boolean {
+        return this.stop;
+    }
+
+    public onShare(e: egret.TouchEvent) {
+        this.cm.winbt.currentState = "up";
+        this.cm.winbt.touchEnabled = true;
+
+        GameData.reliveTimes += 1;
+    }
+
+    public onWinbtClick(e: egret.TouchEvent) {
+        this.cm.btSound.play(0, 1);
+
+        switch (this.buttonState) {
+        case 0:
+            this.continuePlay();
+            break;
+        case 1:
+            this.nexeLevel();
+            break;
+        default:
+            this.backWinIndex();
+        }
     }
 }

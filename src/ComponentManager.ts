@@ -27,14 +27,23 @@ class ComponentManager {
     private comment:eui.Label = null;
 
     // Next challenge page and fail page
-    private winbt:eui.Button = null;
+    public winbt:eui.Button = null;
     private winScore:eui.Label = null;
+    private winScoreData:eui.Label = null;
     private winHome:eui.Image = null;
     private winText:eui.Label = null;
 
     // sound
     public ddSound:egret.Sound = null;
     public btSound:egret.Sound = null;
+
+    // unsupport
+    private plane:egret.Sprite = null;
+    private explain:eui.Label = null;
+    private confirm:eui.Button = null;
+
+    // wx opendata
+    public rankmap:egret.Bitmap = null;
 
     public static getInstance(): ComponentManager {
         if (ComponentManager.instance == null) {
@@ -91,8 +100,8 @@ class ComponentManager {
             let texture: egret.Texture = RES.getRes("title_png");
             title.texture = texture;
             title.horizontalCenter = 0;
-            title.top = 60;
-            title.percentHeight = 18;
+            title.top = 70;
+            title.percentHeight = 14;
             title.percentWidth = 80;
             this.title = title;
         }
@@ -112,9 +121,11 @@ class ComponentManager {
             this.start.verticalCenter = 150;
             this.start.maxHeight = 100;
             this.start.maxWidth = 300;
+            this.start.currentState = "up";
             this.start.$addListener(egret.TouchEvent.TOUCH_TAP, d.onStartButtonClick, d);
             this.start.$addListener(egret.TouchEvent.TOUCH_BEGIN, d.onStartButtonDown, d);
             this.start.$addListener(egret.TouchEvent.TOUCH_END, d.onStartButtonUp, d);
+            this.start.$addListener(egret.TouchEvent.TOUCH_RELEASE_OUTSIDE, d.onStartButtonUp, d);
         }
         this.game.addChild(this.start);
     }
@@ -125,15 +136,18 @@ class ComponentManager {
 
 
     public showRankButton() {
+        let d = Director.getInstance();
         if (this.rank == null) {
             let rank = new eui.Label();
             rank.text = "查看排行 >";
             rank.size = 26;
             rank.bold = true;
             rank.fontFamily = "Youyuan";
-            rank.textColor = 0x9b0861;
+            rank.textColor = 0xcc6600;
             rank.horizontalCenter = 0;
-            rank.verticalCenter = 300;
+            rank.verticalCenter = 260;
+            rank.touchEnabled = true;
+            rank.$addListener(egret.TouchEvent.TOUCH_TAP, d.onRank, d);
             this.rank = rank;
         }
         this.game.addChild(this.rank);
@@ -144,15 +158,18 @@ class ComponentManager {
     }
 
     public showMore() {
+        let d = Director.getInstance();
         if (this.more == null) {
             let more = new eui.Label();
             more.text = "更多好玩 >";
             more.size = 26;
             more.bold = true;
             more.fontFamily = "Youyuan";
-            more.textColor = 0x9b0861;
+            more.textColor = 0xcc6600;
             more.horizontalCenter = 0;
-            more.verticalCenter = 360;
+            more.verticalCenter = 310;
+            more.touchEnabled = true;
+            more.$addListener(egret.TouchEvent.TOUCH_TAP, d.onMore, d);
             this.more = more;
         }
         this.game.addChild(this.more);
@@ -168,7 +185,7 @@ class ComponentManager {
             let score = new eui.Label();
             score.size = 100;
             score.bold = true;
-            score.textColor = 0xc81983;
+            score.textColor = 0xff9933;
             score.top = 20;
             score.left = 40;
             this.score = score;
@@ -195,6 +212,7 @@ class ComponentManager {
             this.stop.$addListener(egret.TouchEvent.TOUCH_TAP, d.onStopButtonClick, d);
             this.stop.$addListener(egret.TouchEvent.TOUCH_BEGIN, d.onStopButtonDown, d);
             this.stop.$addListener(egret.TouchEvent.TOUCH_END, d.onStopButtonUp, d);
+            this.stop.$addListener(egret.TouchEvent.TOUCH_RELEASE_OUTSIDE, d.onStopButtonUp, d);
         }
         this.game.addChild(this.stop);
     }
@@ -227,9 +245,9 @@ class ComponentManager {
         let d = Director.getInstance();
         if (this.game == null) { return; }
         if (this.home == null) {
-            let index = new eui.Image();
+            let index = new eui.Image();            
             let text: egret.Texture = RES.getRes("home_png");
-            index.texture = text;
+            index.texture = text;  
             index.width = 40;
             index.height = 40;
             index.top = 24;
@@ -255,7 +273,7 @@ class ComponentManager {
             des.horizontalCenter = 0;
             des.verticalCenter = -100;
             des.percentWidth = 80;
-            des.percentHeight = 32;
+            des.percentHeight = 34;
             des.touchEnabled = true;
             des.$addListener(egret.TouchEvent.TOUCH_TAP, d.resumeGame, d);
             this.des = des;
@@ -346,19 +364,31 @@ class ComponentManager {
     public showWinScore() {
         if (this.winScore == null) {
             this.winScore = new eui.Label();
-            this.winScore.size = 100;
-            this.winScore.textColor = 0xc81983;
+            this.winScore.size = 24;
+            this.winScore.textColor = 0xcc6600;
             this.winScore.horizontalCenter = 0;
-            this.winScore.verticalCenter = -200;
+            this.winScore.verticalCenter = -300;
+            this.winScore.text = "本次得分";
         }
-        this.winScore.text = "得分:" + String(GameData.scoreNo);
+
+        if (this.winScoreData == null) {
+            this.winScoreData = new eui.Label();
+            this.winScoreData.size = 100;
+            this.winScoreData.textColor = 0xcc6600;
+            this.winScoreData.horizontalCenter= 0;
+            this.winScoreData.verticalCenter = -230;
+        }
+        this.winScoreData.text = String(GameData.scoreNo);
+
         this.game.addChild(this.winScore);
+        this.game.addChild(this.winScoreData);
     }
     public removeWinScore() {
         this.game.removeChild(this.winScore);
+        this.game.removeChild(this.winScoreData);
     }
 
-    public showWinbt(text: string) {
+    public showWinbt() {
         let d = Director.getInstance();
         if (this.winbt == null) {
             let winbt = new eui.Button();
@@ -367,21 +397,27 @@ class ComponentManager {
             winbt.maxHeight = 100;
             winbt.maxWidth = 300;
             this.winbt = winbt;
+            this.winbt.$addListener(egret.TouchEvent.TOUCH_TAP, d.onWinbtClick, d);
             this.winbt.$addListener(egret.TouchEvent.TOUCH_BEGIN, d.onWinButtonDown, d);
             this.winbt.$addListener(egret.TouchEvent.TOUCH_END, d.onWinButtonUp, d);
+            this.winbt.$addListener(egret.TouchEvent.TOUCH_RELEASE_OUTSIDE, d.onWinButtonUp, d);
         }
-        if (text == "nextlevel") {
-            this.winbt.label = "下 一 关";
-            if (this.winbt.hasEventListener(egret.TouchEvent.TOUCH_TAP)) {
-                this.winbt.removeEventListener(egret.TouchEvent.TOUCH_TAP, d.onWinButtonClickConinue, d);
-            }
-            this.winbt.$addListener(egret.TouchEvent.TOUCH_TAP, d.onWinButtonClickNext, d);
-        } else if (text == "continue") {
+
+        switch (d.buttonState) {
+        case 0:
             this.winbt.label = "继  续";
-            if (this.winbt.hasEventListener(egret.TouchEvent.TOUCH_TAP)) {
-                this.winbt.removeEventListener(egret.TouchEvent.TOUCH_TAP, d.onWinButtonClickNext, d);
-            }
-            this.winbt.$addListener(egret.TouchEvent.TOUCH_TAP, d.onWinButtonClickConinue, d);
+            this.winbt.currentState = "disable";
+            this.winbt.touchEnabled = false;
+            break;
+        case 1:
+            this.winbt.label = "下 一 关";
+            this.winbt.currentState = "up";
+            this.winbt.touchEnabled = true;
+            break;
+        default:
+            this.winbt.label = "返  回";
+            this.winbt.currentState = "up";
+            this.winbt.touchEnabled = true;
         }
         this.game.addChild(this.winbt);
     }
@@ -394,7 +430,7 @@ class ComponentManager {
         if (this.game == null) { return; }
         if (this.winHome == null) {
             let index = new eui.Image();
-            let text: egret.Texture = RES.getRes("home_png");
+            let text: egret.Texture = RES.getRes("homel_png");
             index.texture = text;
             index.width = 40;
             index.height = 40;
@@ -412,21 +448,23 @@ class ComponentManager {
     }
 
     public showWinText(str: string) {
+        let d = Director.getInstance();
         if (this.winText == null) {
             let gold = new eui.Label();
             gold.size = 32;
             gold.bold = true;
             gold.verticalAlign = "bottom";
             gold.fontFamily = "Youyuan";
-            gold.textColor = 0x9b0861;
+            gold.textColor = 0xff7c00;
             gold.horizontalCenter = 0;
-            gold.verticalCenter = 120;
+            gold.verticalCenter = 90;
             this.winText = gold;
+            this.winText.$addListener(egret.TouchEvent.TOUCH_TAP, d.onShare, d);
         }
-        if (str == "nextlevel") {
+        if (str == "continue" && GameData.reliveTimes < 1) {
             this.winText.text = "分享可继续 >";
         } else {
-            this.winText.text = " ";
+            this.winText.text = "";
         }
         this.game.addChild(this.winText);
     }
@@ -435,4 +473,55 @@ class ComponentManager {
         this.game.removeChild(this.winText);
     }
 
+    public showRankMap() {
+        this.game.addChild(this.rankmap);
+    }
+    public removeRankMap() {
+        this.game.removeChild(this.rankmap);
+    }
+
+    public showUnsupport() {
+        let d = Director.getInstance();
+        if (this.plane == null) {
+            this.plane = new egret.Sprite();
+            this.plane.width = this.stageW * 0.8;
+            this.plane.height = this.stageH * 0.2;
+            this.plane.anchorOffsetX = Math.floor(this.plane.width * 0.5);
+            this.plane.anchorOffsetY = Math.floor(this.plane.height * 0.5);
+            this.plane.x = Math.floor(this.stageW * 0.5 );
+            this.plane.y = Math.floor(this.stageH * 0.5 + 100);
+            this.plane.graphics.lineStyle(10, 0xff9933);
+            this.plane.graphics.beginFill(0xffffff, 1);
+            this.plane.graphics.drawRoundRect(0, 0, this.plane.width, this.plane.height, 50, 50);
+            this.plane.graphics.endFill();
+        }
+        if (this.explain == null) {
+            this.explain = new eui.Label();
+            this.explain.text = "功能尚未支持";
+            this.explain.size = 38;
+            this.explain.bold = true;
+            this.explain.fontFamily = "Youyuan";
+            this.explain.textColor = 0xff9933;
+            this.explain.x = 100;
+            this.explain.y = 30;
+        }
+        if (this.confirm == null) {
+            this.confirm = new eui.Button();
+            this.confirm.maxHeight = 60;
+            this.confirm.maxWidth = 200;
+            this.confirm.label = "知 道 了";
+            this.confirm.x = this.plane.width * 0.5;
+            this.confirm.y = this.plane.height * 0.5 + 30;
+            this.confirm.$addListener(egret.TouchEvent.TOUCH_TAP, d.onMoreRemove, d);
+        }
+        this.plane.addChild(this.explain);
+        this.plane.addChild(this.confirm);
+        this.game.addChild(this.plane);
+    }
+
+    public removeUnsupport() {
+        this.plane.removeChild(this.explain);
+        this.plane.removeChild(this.confirm);
+        this.game.removeChild(this.plane);
+    }
 }
