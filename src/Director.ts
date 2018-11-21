@@ -107,7 +107,7 @@ class Director {
         this.cm.showTransLayer();
         this.cm.showWinHome();
         this.cm.showWinScore();
-        this.cm.showWinText("nextlevel");
+        this.cm.showWinText();
         this.cm.showWinbt();
     }
 
@@ -151,7 +151,7 @@ class Director {
         this.cm.showTransLayer();
         this.cm.showWinHome();
         this.cm.showWinScore();
-        this.cm.showWinText("continue");
+        this.cm.showWinText();
         this.cm.showWinbt(); 
     }
 
@@ -165,15 +165,29 @@ class Director {
     }
 
     public onRank(e: egret.TouchEvent) {
-        console.log("Rank button clicked!");
-        let platform = window.platform;
+        this.cm.removeTitle();
+        this.cm.showRankMap();
+        this.cm.showRankHome();
+    }
+    public onExitRank() {
+        this.cm.removeRankMap();
+        this.cm.removeRankHome();
+        this.cm.showTitle();
     }
 
     public onMore(e: egret.TouchEvent) {
         this.cm.showUnsupport();
     }
     public onMoreRemove(e: egret.TouchEvent) {
+        this.cm.btSound.play(0, 1);
         this.cm.removeUnsupport();
+    }
+
+    public onConfirmDown(e: egret.TouchEvent) {
+        this.cm.onButtonDown("con");
+    }
+    public onConfirmUp(e: egret.TouchEvent) {
+        this.cm.onButtonUp("con");
     }
 
     public getStop(): boolean {
@@ -181,10 +195,11 @@ class Director {
     }
 
     public onShare(e: egret.TouchEvent) {
-        this.cm.winbt.currentState = "up";
-        this.cm.winbt.touchEnabled = true;
-
-        GameData.reliveTimes += 1;
+        if (this.buttonState == 0) {
+            this.cm.winbt.currentState = "up";
+            this.cm.winbt.touchEnabled = true;
+            GameData.reliveTimes += 1;
+        }
     }
 
     public onWinbtClick(e: egret.TouchEvent) {

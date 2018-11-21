@@ -44,6 +44,7 @@ class ComponentManager {
 
     // wx opendata
     public rankmap:egret.Bitmap = null;
+    private rankHome:eui.Image = null;
 
     public static getInstance(): ComponentManager {
         if (ComponentManager.instance == null) {
@@ -59,6 +60,8 @@ class ComponentManager {
 
         this.ddSound = RES.getRes("dd_mp3");
         this.btSound = RES.getRes("bt_mp3");
+
+        let platform = window.platform;
     }
 
     public showFirstLayer() {
@@ -88,9 +91,6 @@ class ComponentManager {
     public removeTransLayer() {
         if (this.game == null) { return; }
         this.game.removeChild(this.transLayer);
-    }
-    public nothing() {
-
     }
 
     public showTitle() {
@@ -307,28 +307,44 @@ class ComponentManager {
     }
 
     public onButtonDown(str:string) {
-        if (str == "start") {
+        switch (str) {
+        case "start":
             this.start.scaleX = 0.9;
             this.start.scaleY = 0.9;
-        } else if (str == "stop") {
+            break;
+        case "stop":
             this.stop.scaleX = 0.9;
-            this.stop.scaleY = 0.9;          
-        } else if (str == "win") {
+            this.stop.scaleY = 0.9;  
+            break;
+        case "win":        
             this.winbt.scaleX = 0.9;
-            this.winbt.scaleY = 0.9;           
+            this.winbt.scaleY = 0.9;
+            break;        
+        case "con":
+            this.confirm.scaleX = 0.9;
+            this.confirm.scaleY = 0.9;
+            break;
         }
     }
 
     public onButtonUp(str:string) {
-        if (str == "start") {
+        switch (str) {
+        case "start":
             this.start.scaleX = 1;
             this.start.scaleY = 1;
-        } else if (str == "stop") {
+            break;
+        case "stop":
             this.stop.scaleX = 1;
-            this.stop.scaleY = 1;          
-        } else if (str == "win") {
+            this.stop.scaleY = 1;  
+            break;
+        case "win":        
             this.winbt.scaleX = 1;
-            this.winbt.scaleY = 1;           
+            this.winbt.scaleY = 1;
+            break;        
+        case "con":
+            this.confirm.scaleX = 1;
+            this.confirm.scaleY = 1;
+            break;
         }
     }
 
@@ -367,7 +383,7 @@ class ComponentManager {
             this.winScore.size = 24;
             this.winScore.textColor = 0xcc6600;
             this.winScore.horizontalCenter = 0;
-            this.winScore.verticalCenter = -300;
+            this.winScore.verticalCenter = -280;
             this.winScore.text = "本次得分";
         }
 
@@ -376,7 +392,7 @@ class ComponentManager {
             this.winScoreData.size = 100;
             this.winScoreData.textColor = 0xcc6600;
             this.winScoreData.horizontalCenter= 0;
-            this.winScoreData.verticalCenter = -230;
+            this.winScoreData.verticalCenter = -210;
         }
         this.winScoreData.text = String(GameData.scoreNo);
 
@@ -447,7 +463,7 @@ class ComponentManager {
         this.game.removeChild(this.winHome);        
     }
 
-    public showWinText(str: string) {
+    public showWinText() {
         let d = Director.getInstance();
         if (this.winText == null) {
             let gold = new eui.Label();
@@ -461,10 +477,10 @@ class ComponentManager {
             this.winText = gold;
             this.winText.$addListener(egret.TouchEvent.TOUCH_TAP, d.onShare, d);
         }
-        if (str == "continue" && GameData.reliveTimes < 1) {
+        if (d.buttonState == 0 && GameData.reliveTimes < 1) {
             this.winText.text = "分享可继续 >";
         } else {
-            this.winText.text = "";
+            this.winText.text = "炫耀一下 >";
         }
         this.game.addChild(this.winText);
     }
@@ -475,9 +491,13 @@ class ComponentManager {
 
     public showRankMap() {
         this.game.addChild(this.rankmap);
+        this.more.touchEnabled = false;
+        this.start.touchEnabled = false;
     }
     public removeRankMap() {
         this.game.removeChild(this.rankmap);
+        this.more.touchEnabled = true;
+        this.start.touchEnabled = true;
     }
 
     public showUnsupport() {
@@ -513,15 +533,44 @@ class ComponentManager {
             this.confirm.x = this.plane.width * 0.5;
             this.confirm.y = this.plane.height * 0.5 + 30;
             this.confirm.$addListener(egret.TouchEvent.TOUCH_TAP, d.onMoreRemove, d);
+            this.confirm.$addListener(egret.TouchEvent.TOUCH_BEGIN, d.onConfirmDown, d);
+            this.confirm.$addListener(egret.TouchEvent.TOUCH_END, d.onConfirmUp, d);
+            this.confirm.$addListener(egret.TouchEvent.TOUCH_RELEASE_OUTSIDE, d.onConfirmUp, d);
         }
         this.plane.addChild(this.explain);
         this.plane.addChild(this.confirm);
         this.game.addChild(this.plane);
+
+        this.rank.touchEnabled = false;
+        this.start.touchEnabled = false;
     }
 
     public removeUnsupport() {
         this.plane.removeChild(this.explain);
         this.plane.removeChild(this.confirm);
         this.game.removeChild(this.plane);
+        this.rank.touchEnabled = true;
+        this.start.touchEnabled = true;
+    }
+
+    public showRankHome() {
+        let d = Director.getInstance();
+        if (this.rankHome == null) {
+            let index = new eui.Image();
+            let text: egret.Texture = RES.getRes("close_png");
+            index.texture = text;
+            index.width = 40;
+            index.height = 40;
+            index.top = 34 + this.stageH * 0.4;
+            index.left = 24 + this.stageW * 0.4;
+            index.touchEnabled = true;
+            index.$addListener(egret.TouchEvent.TOUCH_TAP, d.onExitRank, d);
+            this.rankHome = index;
+        }
+        this.game.addChild(this.rankHome);
+    }
+    public removeRankHome() {
+        if (this.game == null) { return; }
+        this.game.removeChild(this.rankHome);        
     }
 }
