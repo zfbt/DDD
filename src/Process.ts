@@ -60,11 +60,7 @@ class Process {
             this.bar.value -= 1;
         }
         if (this.bar.value == 0) {
-            setTimeout(function() {
-                if (!Director.getInstance().getStop()) {
-                    Director.getInstance().failPage();
-                }
-            }, 850);
+            Director.getInstance().timeEnd();
         }
     }
 }

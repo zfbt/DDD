@@ -2,7 +2,6 @@ class Director {
     public static instance:Director = null;
     private game:Main = null;
     private cm:ComponentManager = null;
-    private stop:boolean = false;
 
     public buttonState:number = 0; // 0--continue, 1-nextlevel, 2-return
 
@@ -23,7 +22,7 @@ class Director {
         this.cm.showTransLayer();
         this.cm.showTitle();
         this.cm.showStart();
-        this.cm.showRankButton();
+        this.cm.showRank();
         this.cm.showMore();
         GameData.makeBoardDD(this.game, 20);
         GameData.scoreNo = 0;
@@ -62,7 +61,6 @@ class Director {
         this.cm.onButtonUp("stop");
     }
     public onStopButtonClick(e: egret.TouchEvent) {
-        this.stop = true;
         this.cm.btSound.play(0, 1);
         this.showDesPage();        
     }
@@ -78,7 +76,6 @@ class Director {
     }
 
     public backIndex(e: egret.TouchEvent) {
-        this.stop = false;
         this.cm.removeDesItem();
         this.cm.removeGameItem();
         Process.getInstance().exit();
@@ -86,7 +83,6 @@ class Director {
     }
 
     public resumeGame(e: egret.TouchEvent) {
-        this.stop = false;
         this.cm.removeDesItem();
 
         // Resume game: first check game state
@@ -94,6 +90,7 @@ class Director {
             this.nextLevelPage();
         }
         if (Process.getInstance().bar.value == 0) {
+            this.cm.showTransLayer();
             this.failPage();
         }
 
@@ -104,7 +101,6 @@ class Director {
         this.buttonState = 1;
         this.cm.removeScore();
         this.cm.removeStop();
-        this.cm.showTransLayer();
         this.cm.showWinHome();
         this.cm.showWinScore();
         this.cm.showWinText();
@@ -148,7 +144,7 @@ class Director {
         }
         this.cm.removeScore();
         this.cm.removeStop();
-        this.cm.showTransLayer();
+        
         this.cm.showWinHome();
         this.cm.showWinScore();
         this.cm.showWinText();
@@ -190,10 +186,6 @@ class Director {
         this.cm.onButtonUp("con");
     }
 
-    public getStop(): boolean {
-        return this.stop;
-    }
-
     public onShare(e: egret.TouchEvent) {
         if (this.buttonState == 0) {
             this.cm.winbt.currentState = "up";
@@ -215,5 +207,12 @@ class Director {
         default:
             this.backWinIndex();
         }
+    }
+
+    public timeEnd() {
+        this.cm.showTransLayer();
+        setTimeout(function() {
+            Director.getInstance().failPage();
+        }, 750);
     }
 }

@@ -18,7 +18,7 @@ class ComponentManager {
 
     // Component of game page
     private score:eui.Label = null;
-    private stop:eui.Button = null;
+    public stop:eui.Button = null;
 
     // Component of description page
     private back:egret.Shape = null;
@@ -135,7 +135,7 @@ class ComponentManager {
     }
 
 
-    public showRankButton() {
+    public showRank() {
         let d = Director.getInstance();
         if (this.rank == null) {
             let rank = new eui.Label();
@@ -491,13 +491,15 @@ class ComponentManager {
 
     public showRankMap() {
         this.game.addChild(this.rankmap);
-        this.more.touchEnabled = false;
-        this.start.touchEnabled = false;
+        this.removeStart();
+        this.removeMore();
+        this.removeRank();
     }
     public removeRankMap() {
         this.game.removeChild(this.rankmap);
-        this.more.touchEnabled = true;
-        this.start.touchEnabled = true;
+        this.showStart();
+        this.showRank();
+        this.showMore();
     }
 
     public showUnsupport() {
@@ -557,12 +559,12 @@ class ComponentManager {
         let d = Director.getInstance();
         if (this.rankHome == null) {
             let index = new eui.Image();
-            let text: egret.Texture = RES.getRes("close_png");
+            let text: egret.Texture = RES.getRes("homel_png");
             index.texture = text;
             index.width = 40;
             index.height = 40;
-            index.top = 34 + this.stageH * 0.4;
-            index.left = 24 + this.stageW * 0.4;
+            index.top = 24;
+            index.left = 24;
             index.touchEnabled = true;
             index.$addListener(egret.TouchEvent.TOUCH_TAP, d.onExitRank, d);
             this.rankHome = index;

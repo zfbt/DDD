@@ -254,10 +254,9 @@ class GameData {
         // Check win
         if (GameData.countDD <= 7 && GameData.win()) {
             Process.getInstance().stop();
+            ComponentManager.getInstance().showTransLayer();
             setTimeout(function() {
-                if (!Director.getInstance().getStop()) {
-                    Director.getInstance().nextLevelPage();
-                }
+                Director.getInstance().nextLevelPage();
             }, 850);
         } 
     }
